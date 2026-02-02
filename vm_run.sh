@@ -14,11 +14,16 @@
 QUAY_USER="${QUAY_USER:-YOUR_QUAY_USERNAME}"
 VERTEX_PROJECT_ID="${VERTEX_PROJECT_ID:-your-gcp-project-id}"
 VERTEX_LOCATION="${VERTEX_LOCATION:-us-central1}"
+GEMINI_MODEL="${GEMINI_MODEL:-gemini-1.5-pro-001}"
 
 # Paths on the VM (Ensure these files exist!)
 HOST_CERT_PATH="${HOST_CERT_PATH:-/etc/ssl/certs/repo-analyzer.crt}"
 HOST_KEY_PATH="${HOST_KEY_PATH:-/etc/ssl/private/repo-analyzer.key}"
 HOST_SSH_KEY_PATH="${HOST_SSH_KEY_PATH:-/home/your-user/.ssh/id_rsa}"
+
+# Port Configuration
+# If you get "Permission denied" on port 443 (rootless mode), change this to 8443
+HOST_PORT="${HOST_PORT:-443}"
 # ------------------------------------
 
 CONTAINER_NAME="repo-analyzer"
@@ -52,10 +57,11 @@ echo "Starting container..."
 docker run -d \
   --name "$CONTAINER_NAME" \
   --restart always \
-  -p 443:443 \
+  -p "$HOST_PORT":443 \
   -e ENV=prod \
   -e VERTEX_PROJECT_ID="$VERTEX_PROJECT_ID" \
   -e VERTEX_LOCATION="$VERTEX_LOCATION" \
+  -e GEMINI_MODEL="$GEMINI_MODEL" \
   -e CERT_PATH="/etc/certs/cert.pem" \
   -e KEY_PATH="/etc/certs/key.pem" \
   -e SSH_KEY_PATH="/etc/ssh/id_rsa" \
@@ -64,4 +70,4 @@ docker run -d \
   -v "$HOST_SSH_KEY_PATH":/etc/ssh/id_rsa:ro \
   "$IMAGE_NAME"
 
-echo "Done! App should be running at https://<vm-ip>/"
+echo "Done! App should be running at https://<vm-ip>:$HOST_PORT/"
