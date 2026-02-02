@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount source code for live reload (re-build needed for frontend changes in this setup, 
+      # but backend can reload if we mount securely). 
+      # For dev, we usually run frontend and backend separately. 
+      # This compose is for testing the production-like build.
+      - ./backend/app:/app/app
+    env_file:
+      - .env
