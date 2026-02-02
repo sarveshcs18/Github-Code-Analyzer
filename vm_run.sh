@@ -27,12 +27,18 @@ IMAGE_NAME="quay.io/$QUAY_USER/repo-analyzer:latest"
 echo "--- Deploying $CONTAINER_NAME ---"
 echo "Image: $IMAGE_NAME"
 
-# 1. Login to Quay.io (if needed)
-# docker login quay.io
+# 1. Check for Offline Image (Tar) or Pull
+TAR_FILE="repo-analyzer.tar"
 
-# 2. Pull latest image
-echo "Pulling image..."
-docker pull "$IMAGE_NAME"
+if [ -f "$TAR_FILE" ]; then
+    echo "Found offline image: $TAR_FILE"
+    echo "Loading image from file..."
+    docker load -i "$TAR_FILE"
+else
+    echo "No offline tar file found ($TAR_FILE)."
+    echo "Attempting to pull from Quay.io..."
+    docker pull "$IMAGE_NAME"
+fi
 
 # 3. Stop/Remove existing container
 if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
